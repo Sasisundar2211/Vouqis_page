@@ -50,4 +50,4 @@ Vouqis weights the pass rate (50%), latency (30%), and error diversity (20%) to 
 
 Vouqis offers a free tier for single audits and 30-day public report history. A Pro tier is available for API keys, CI/CD integration, and 90-day history. 
 
-Built by Sasi. For support, contact support@vouqis.tech.
+Built by Sasi. For support, contact sasisundhar2211@gmail.com
