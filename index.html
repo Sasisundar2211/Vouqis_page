@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Vouqis — Score any MCP server before your agent trusts it</title>
+  <title>Vouqis — MCP Server Reliability Auditor</title>
   <meta name="description" content="10 deterministic JSON-RPC probes. 0–100 trust score. CI/CD gate. No LLM calls. Know if your MCP server actually works in 30 seconds." />
   <meta property="og:title" content="Vouqis — MCP Server Reliability Auditor" />
-  <meta property="og:description" content="Score any MCP server before your agent trusts it. 10 probes. 30 seconds. Free." />
+  <meta property="og:description" content="HTTP 200 is not success for MCP. Vouqis runs deterministic reliability probes and generates a trust score before your agents trust the server." />
   <meta property="og:url" content="https://vouqis.tech" />
   <meta name="twitter:card" content="summary_large_image" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -35,9 +35,13 @@
       --green:        #10b981;
       --green-dim:    #064e3b;
       --green-border: #065f46;
+      --green-bg:     rgba(16, 185, 129, 0.06);
 
       --amber: #f59e0b;
+      --orange: #f97316;
+      --orange-red: #ef6b35;
       --red:   #ef4444;
+      --red-bright: #f87171;
 
       --text:   #e2e8f0;
       --text-2: #94a3b8;
@@ -64,16 +68,6 @@
     .container-sm { max-width: 760px;  margin: 0 auto; padding: 0 24px; }
     .container-xs { max-width: 560px;  margin: 0 auto; padding: 0 24px; }
 
-    /* ─── URGENCY BANNER ─── */
-    #banner {
-      background: var(--blue-dim);
-      border-bottom: 1px solid var(--blue-border);
-      padding: 9px 16px;
-      text-align: center;
-    }
-    #banner p { font-family: var(--mono); font-size: 12px; color: var(--blue-bright); }
-    #banner a { color: #fff; text-decoration: underline; font-weight: 600; }
-
     /* ─── NAV ─── */
     nav {
       position: sticky; top: 0; z-index: 100;
@@ -85,7 +79,14 @@
       display: flex; align-items: center;
     }
     .nav-inner { max-width: 1080px; margin: 0 auto; width: 100%; display: flex; align-items: center; gap: 28px; }
+    .nav-brand-wrap { display: flex; align-items: center; gap: 10px; }
     .nav-brand { font-family: var(--mono); font-weight: 700; font-size: 15px; color: var(--text); letter-spacing: -0.02em; }
+    .nav-tag {
+      font-family: var(--mono); font-size: 10px; color: var(--text-4);
+      background: var(--bg-card); border: 1px solid var(--border);
+      padding: 2px 8px; border-radius: 4px; letter-spacing: .04em;
+      white-space: nowrap;
+    }
     .nav-links { display: flex; gap: 20px; }
     .nav-links a { font-size: 13px; color: var(--text-3); transition: color .15s; }
     .nav-links a:hover { color: var(--text); }
@@ -128,58 +129,42 @@
       position: relative;
     }
     h1 .accent { color: var(--blue-bright); }
+    h1 .danger { color: var(--red); }
     .hero-sub {
-      font-size: 18px; color: var(--text-2); max-width: 540px;
-      margin: 0 auto 44px; line-height: 1.65;
+      font-size: 18px; color: var(--text-2); max-width: 560px;
+      margin: 0 auto 40px; line-height: 1.65;
       position: relative;
     }
-    .install-block {
-      display: flex; align-items: center; gap: 10px;
-      background: var(--bg-card); border: 1px solid var(--border);
-      border-radius: 8px; padding: 13px 18px;
-      font-family: var(--mono); font-size: 14px;
-      max-width: 440px; margin: 0 auto 14px;
-      cursor: pointer; transition: border-color .15s;
-      text-align: left; position: relative;
+    .hero-cta-row {
+      display: flex; align-items: center; justify-content: center; gap: 12px;
+      flex-wrap: wrap; margin-bottom: 16px; position: relative;
     }
-    .install-block:hover { border-color: var(--blue); }
-    .install-prompt { color: var(--text-3); user-select: none; }
-    .install-cmd { color: var(--blue-bright); flex: 1; }
-    .copy-btn {
-      background: var(--blue-dim); border: none; border-radius: 4px;
-      padding: 3px 10px; font-family: var(--mono); font-size: 11px;
-      color: var(--text-3); cursor: pointer; transition: all .15s;
-      white-space: nowrap;
-    }
-    .copy-btn:hover { background: var(--blue); color: #fff; }
-    .copy-btn.copied { background: var(--green-dim); color: var(--green); }
-    .hero-cta {
-      display: block; max-width: 380px; margin: 0 auto 14px;
+    .btn-primary {
       background: var(--blue); color: #ffffff;
       font-family: var(--mono); font-size: 14px; font-weight: 700;
-      padding: 14px 24px; border-radius: 8px; text-align: center;
+      padding: 14px 28px; border-radius: 8px; text-align: center;
       transition: background .15s, box-shadow .15s;
       box-shadow: 0 0 28px rgba(59,130,246,0.35);
-      position: relative;
+      white-space: nowrap; display: inline-block;
     }
-    .hero-cta:hover { background: var(--blue-bright); box-shadow: 0 0 36px rgba(59,130,246,0.45); }
-    .hero-note { font-family: var(--mono); font-size: 12px; color: var(--text-4); position: relative; }
-
-    /* ─── STAT STRIP ─── */
-    #stats { padding: 0 24px 80px; }
-    .stat-grid {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
-      max-width: 860px; margin: 0 auto;
+    .btn-primary:hover { background: var(--blue-bright); box-shadow: 0 0 36px rgba(59,130,246,0.45); }
+    .btn-secondary {
+      background: transparent; color: var(--text-2);
+      font-family: var(--mono); font-size: 14px; font-weight: 600;
+      padding: 13px 28px; border-radius: 8px; text-align: center;
+      border: 1px solid var(--border); white-space: nowrap; display: inline-block;
+      transition: border-color .15s, color .15s;
     }
-    .stat-card {
-      background: var(--bg-card); border: 1px solid var(--border);
-      border-radius: 10px; padding: 28px 24px; text-align: center;
-      transition: border-color .2s;
+    .btn-secondary:hover { border-color: var(--blue-border); color: var(--text); }
+    .hero-note { font-family: var(--mono); font-size: 12px; color: var(--text-4); position: relative; margin-bottom: 32px; }
+    .proof-strip {
+      display: flex; align-items: center; justify-content: center;
+      gap: 0; flex-wrap: wrap; position: relative;
+      font-family: var(--mono); font-size: 12px; color: var(--text-4);
+      max-width: 660px; margin: 0 auto;
     }
-    .stat-card:hover { border-color: var(--blue-border); }
-    .stat-num { font-family: var(--mono); font-size: 40px; font-weight: 700; color: var(--blue); line-height: 1; margin-bottom: 8px; }
-    .stat-label { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
-    .stat-sub { font-size: 12px; color: var(--text-3); }
+    .proof-strip span { padding: 0 10px; }
+    .proof-strip span + span { border-left: 1px solid var(--border); }
 
     /* ─── SECTION LABELS ─── */
     .section-label {
@@ -194,7 +179,71 @@
     }
     section .section-sub { font-size: 16px; color: var(--text-2); max-width: 560px; margin-bottom: 48px; line-height: 1.6; }
 
-    /* ─── TERMINAL ─── */
+    /* ─── FAILURE MATH ─── */
+    #failure-math { background: var(--bg-dark); }
+    .chain-wrap {
+      display: flex; align-items: center; justify-content: center;
+      gap: 0; max-width: 960px; margin: 0 auto 32px; flex-wrap: nowrap;
+      overflow-x: auto; padding: 8px 0;
+    }
+    .chain-node {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 10px; padding: 20px 18px; text-align: center;
+      min-width: 120px; flex-shrink: 0;
+    }
+    .chain-node.chain-final {
+      border-color: #7f1d1d; background: #0f0808;
+    }
+    .chain-node-label {
+      font-family: var(--mono); font-size: 11px; color: var(--text-3);
+      text-transform: uppercase; letter-spacing: .06em; margin-bottom: 10px;
+    }
+    .chain-pct {
+      font-family: var(--mono); font-size: 28px; font-weight: 700; line-height: 1;
+      margin-bottom: 6px;
+    }
+    .chain-pct.p71 { color: var(--amber); }
+    .chain-pct.p50 { color: var(--orange); }
+    .chain-pct.p36 { color: var(--orange-red); }
+    .chain-pct.p25 { color: var(--red); }
+    .chain-pct.p18 { color: var(--red-bright); }
+    .chain-mult {
+      font-family: var(--mono); font-size: 11px; color: var(--text-4);
+    }
+    .chain-arrow {
+      color: var(--text-4); font-size: 18px; padding: 0 6px; flex-shrink: 0;
+      align-self: center;
+    }
+    .failure-callout {
+      max-width: 960px; margin: 0 auto;
+      background: #0f0808; border: 1px solid #3b1515;
+      border-left: 3px solid var(--red);
+      border-radius: 0 8px 8px 0;
+      padding: 16px 20px;
+      font-family: var(--mono); font-size: 13px; color: var(--text-2);
+      line-height: 1.7;
+    }
+
+    /* ─── SOCIAL PROOF ─── */
+    #social-proof { background: var(--bg); }
+    .metrics-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+      max-width: 960px; margin: 0 auto;
+    }
+    .metric-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 10px; padding: 28px 20px; text-align: center;
+      transition: border-color .2s;
+    }
+    .metric-card:hover { border-color: var(--blue-border); }
+    .metric-num {
+      font-family: var(--mono); font-size: 34px; font-weight: 700;
+      color: var(--blue); line-height: 1; margin-bottom: 8px;
+    }
+    .metric-label { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+    .metric-sub { font-size: 12px; color: var(--text-3); line-height: 1.5; }
+
+    /* ─── TERMINAL (demo section) ─── */
     #demo { background: var(--bg-dark); }
     .terminal-wrap { max-width: 720px; margin: 0 auto; }
     .terminal {
@@ -219,31 +268,36 @@
     .t-amber { color: var(--amber); }
     .t-white { color: var(--text); }
     .t-label { color: var(--text-2); }
+    .t-fail-row {
+      background: rgba(239, 68, 68, 0.08);
+      border-left: 2px solid var(--red);
+      margin-left: -24px; padding-left: 22px;
+      margin-right: -24px; padding-right: 24px;
+      display: block;
+    }
     .terminal-divider { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
     .t-score { font-size: 15px; font-weight: 600; }
-    .demo-caption { text-align: center; font-size: 14px; color: var(--text-3); margin-top: 20px; }
+    .demo-caption { text-align: center; font-size: 14px; color: var(--text-3); margin-top: 20px; max-width: 560px; margin-left: auto; margin-right: auto; }
 
-    /* ─── PROBLEM ─── */
-    #problem { background: var(--bg-dark); }
-    .problem-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start; max-width: 900px; margin: 0 auto; }
-    .problem-text p { font-size: 15px; color: var(--text-2); line-height: 1.7; margin-bottom: 16px; }
-    .math-card {
-      background: var(--bg-card); border: 1px solid var(--border);
-      border-radius: 10px; padding: 24px; font-family: var(--mono); font-size: 13px;
+    /* ─── MONITORING TABLE ─── */
+    #monitoring { background: var(--bg); }
+    .mon-table { width: 100%; border-collapse: collapse; max-width: 900px; margin: 0 auto; font-size: 14px; }
+    .mon-table th {
+      padding: 12px 16px; text-align: left; font-family: var(--mono); font-size: 11px;
+      letter-spacing: .08em; text-transform: uppercase; color: var(--text-3);
+      border-bottom: 1px solid var(--border);
     }
-    .math-title { color: var(--text-3); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 16px; }
-    .math-row { display: flex; justify-content: space-between; padding: 5px 0; color: var(--text-2); border-bottom: 1px solid var(--border-subtle); }
-    .math-row:last-child { border: none; }
-    .math-row .pct { color: var(--text); font-weight: 500; }
-    .math-final { margin-top: 16px; padding: 12px; background: #1a0808; border: 1px solid #3b1515; border-radius: 6px; text-align: center; }
-    .math-final-num { font-size: 28px; font-weight: 700; color: var(--red); }
-    .math-final-label { font-size: 11px; color: var(--text-3); margin-top: 4px; }
-    .callout-bar {
-      border-left: 3px solid var(--blue); background: var(--blue-dim);
-      padding: 14px 18px; border-radius: 0 6px 6px 0;
-      font-size: 15px; color: var(--text-2); margin-top: 32px; font-style: italic;
-      max-width: 900px; margin-left: auto; margin-right: auto;
+    .mon-table th.col-vouqis { color: var(--green); }
+    .mon-table td {
+      padding: 13px 16px; border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-2); vertical-align: top;
     }
+    .mon-table td:first-child { color: var(--text); font-size: 13px; font-weight: 600; }
+    .mon-table td.col-legacy { color: var(--text-3); }
+    .mon-table td.col-vouqis {
+      color: var(--green); background: var(--green-bg);
+    }
+    .mon-table tr:last-child td { border-bottom: none; }
 
     /* ─── HOW IT WORKS ─── */
     .steps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; max-width: 900px; margin: 0 auto; }
@@ -282,7 +336,7 @@
       border-radius: 4px; align-self: flex-start; border: 1px solid var(--blue-border);
     }
 
-    /* ─── SCORE TIERS ─── */
+    /* ─── SCORE FORMULA ─── */
     .formula-block {
       background: var(--bg-card); border: 1px solid var(--border);
       border-radius: 10px; padding: 24px; font-family: var(--mono); font-size: 14px;
@@ -292,6 +346,8 @@
     .formula-line { padding: 3px 0; }
     .formula-line .kw { color: var(--green); }
     .formula-line .kw-blue { color: var(--blue); }
+
+    /* ─── TRUST TIERS ─── */
     .tiers-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; max-width: 860px; margin: 0 auto; }
     .tier-card { border-radius: 10px; padding: 24px; border: 1px solid; }
     .tier-approved { border-color: var(--green-border); background: #071a10; }
@@ -310,21 +366,71 @@
     .tier-range.danger   { color: var(--red); }
     .tier-desc { font-size: 13px; color: var(--text-3); line-height: 1.6; }
 
-    /* ─── COMPARISON ─── */
-    #compare { background: var(--bg-dark); }
-    .compare-table { width: 100%; border-collapse: collapse; max-width: 860px; margin: 0 auto; font-size: 14px; }
-    .compare-table th {
-      padding: 12px 16px; text-align: left; font-family: var(--mono); font-size: 11px;
-      letter-spacing: .08em; text-transform: uppercase; color: var(--text-3);
+    /* ─── CI/CD GATE ─── */
+    #cicd { background: var(--bg-dark); }
+    .cicd-wrap { max-width: 720px; margin: 0 auto 40px; }
+    .cicd-code {
+      background: #0a1020; border: 1px solid var(--border);
+      border-radius: 10px; overflow: hidden; font-family: var(--mono); font-size: 13px;
+    }
+    .cicd-bar {
+      background: #111d30; padding: 10px 16px; display: flex; align-items: center; gap: 7px;
       border-bottom: 1px solid var(--border);
     }
-    .compare-table th.highlight { color: var(--blue-bright); }
-    .compare-table td { padding: 13px 16px; border-bottom: 1px solid var(--border-subtle); color: var(--text-2); }
-    .compare-table tr td:nth-child(1) { font-size: 13px; }
-    .compare-table tr td:nth-child(4) { background: rgba(59,130,246,0.05); }
-    .check-y { color: var(--green); font-weight: 700; }
-    .check-n { color: var(--text-4); }
-    .check-p { color: var(--amber); }
+    .cicd-filename { margin-left: 8px; font-size: 11px; color: var(--text-3); }
+    .cicd-body {
+      padding: 20px 24px; line-height: 1.8;
+    }
+    .y-key   { color: var(--blue-bright); }
+    .y-val   { color: var(--text); }
+    .y-str   { color: var(--green); }
+    .y-cmt   { color: var(--text-4); }
+    .y-var   { color: var(--amber); }
+    .threshold-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+      max-width: 720px; margin: 0 auto;
+    }
+    .threshold-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 10px; padding: 20px 18px;
+    }
+    .threshold-cmd {
+      font-family: var(--mono); font-size: 13px; color: var(--blue-bright);
+      margin-bottom: 10px; font-weight: 600;
+    }
+    .threshold-desc { font-size: 13px; color: var(--text-3); line-height: 1.6; }
+
+    /* ─── SILENT FAILURES ─── */
+    #silent-failures { background: var(--bg); }
+    .failures-terminal {
+      max-width: 760px; margin: 0 auto;
+      background: #0a1020; border: 1px solid var(--border);
+      border-radius: 10px; overflow: hidden; font-family: var(--mono); font-size: 13px;
+    }
+    .failures-bar {
+      background: #111d30; padding: 10px 16px; display: flex; align-items: center; gap: 7px;
+      border-bottom: 1px solid var(--border);
+    }
+    .failures-body { padding: 20px 24px; line-height: 1.9; }
+    .fail-line { display: flex; align-items: flex-start; gap: 10px; padding: 3px 0; }
+    .fail-verdict {
+      font-family: var(--mono); font-size: 10px; font-weight: 700;
+      padding: 2px 8px; border-radius: 4px; white-space: nowrap; flex-shrink: 0; margin-top: 2px;
+    }
+    .fail-verdict.fail { background: #3b1515; color: var(--red); }
+    .fail-verdict.pass { background: var(--green-dim); color: var(--green); }
+    .fail-desc { color: var(--text-2); }
+    .fail-dim { color: var(--text-4); font-size: 11px; }
+
+    /* ─── CONTRARIAN INSIGHT ─── */
+    #contrarian { background: var(--bg-dark); text-align: center; }
+    .contrarian-inner { max-width: 680px; margin: 0 auto; }
+    .contrarian-quote {
+      font-size: clamp(20px, 3vw, 28px); font-weight: 700; color: var(--text);
+      line-height: 1.4; margin-bottom: 28px; letter-spacing: -.02em;
+    }
+    .contrarian-quote .hl { color: var(--blue-bright); }
+    .contrarian-body { font-size: 16px; color: var(--text-2); line-height: 1.7; }
 
     /* ─── INCIDENTS ─── */
     .incidents-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; max-width: 900px; margin: 0 auto; }
@@ -390,18 +496,27 @@
     }
     .plan-btn.secondary:hover { border-color: var(--text-3); }
 
-    /* ─── USE CASES ─── */
-    #usecases { background: var(--bg-dark); }
-    .usecases-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; max-width: 900px; margin: 0 auto; }
-    .usecase-card {
+    /* ─── INSTALL BLOCK ─── */
+    .install-block {
+      display: flex; align-items: center; gap: 10px;
       background: var(--bg-card); border: 1px solid var(--border);
-      border-radius: 10px; padding: 24px;
-      transition: border-color .2s;
+      border-radius: 8px; padding: 13px 18px;
+      font-family: var(--mono); font-size: 14px;
+      max-width: 440px; margin: 0 auto 14px;
+      cursor: pointer; transition: border-color .15s;
+      text-align: left; position: relative;
     }
-    .usecase-card:hover { border-color: var(--blue-border); }
-    .usecase-icon { font-size: 24px; margin-bottom: 12px; }
-    .usecase-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 10px; }
-    .usecase-body { font-size: 13px; color: var(--text-3); line-height: 1.65; }
+    .install-block:hover { border-color: var(--blue); }
+    .install-prompt { color: var(--text-3); user-select: none; }
+    .install-cmd { color: var(--blue-bright); flex: 1; }
+    .copy-btn {
+      background: var(--blue-dim); border: none; border-radius: 4px;
+      padding: 3px 10px; font-family: var(--mono); font-size: 11px;
+      color: var(--text-3); cursor: pointer; transition: all .15s;
+      white-space: nowrap;
+    }
+    .copy-btn:hover { background: var(--blue); color: #fff; }
+    .copy-btn.copied { background: var(--green-dim); color: var(--green); }
 
     /* ─── FAQ ─── */
     .faq-list { max-width: 720px; margin: 0 auto; }
@@ -438,90 +553,170 @@
     .footer-links { display: flex; gap: 20px; }
     .footer-links a { font-size: 13px; color: var(--text-3); transition: color .15s; }
     .footer-links a:hover { color: var(--text); }
-    .footer-copy { font-size: 12px; color: var(--text-4); text-align: center; margin-top: 24px; }
+    .footer-copy { font-size: 12px; color: var(--text-4); text-align: center; margin-top: 24px; max-width: 1080px; margin-left: auto; margin-right: auto; }
+
+    /* ─── CALLOUT BAR (shared) ─── */
+    .callout-bar {
+      border-left: 3px solid var(--blue); background: var(--blue-dim);
+      padding: 14px 18px; border-radius: 0 6px 6px 0;
+      font-size: 15px; color: var(--text-2); font-style: italic;
+      max-width: 900px; margin: 32px auto 0;
+    }
 
     /* ─── RESPONSIVE ─── */
+    @media (max-width: 900px) {
+      .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+      .threshold-grid { grid-template-columns: 1fr; }
+      .chain-wrap { gap: 0; }
+      .chain-node { min-width: 90px; padding: 14px 12px; }
+      .chain-pct { font-size: 22px; }
+    }
     @media (max-width: 768px) {
       nav { padding: 0 16px; }
       .nav-links { display: none; }
+      .nav-tag { display: none; }
       h1 { font-size: 36px; }
-      .stat-grid       { grid-template-columns: 1fr; gap: 12px; }
-      .problem-grid    { grid-template-columns: 1fr; }
+      .hero-cta-row { flex-direction: column; align-items: stretch; max-width: 320px; margin-left: auto; margin-right: auto; }
+      .btn-primary, .btn-secondary { text-align: center; }
+      .proof-strip { flex-direction: column; gap: 6px; }
+      .proof-strip span { border-left: none !important; padding: 0; }
+      .metrics-grid { grid-template-columns: 1fr 1fr; }
       .steps-grid      { grid-template-columns: 1fr; }
       .probes-grid     { grid-template-columns: 1fr; }
       .tiers-grid      { grid-template-columns: 1fr; }
       .incidents-grid  { grid-template-columns: 1fr; }
       .pricing-grid    { grid-template-columns: 1fr; }
-      .usecases-grid   { grid-template-columns: 1fr; }
+      .chain-wrap { flex-direction: column; align-items: center; }
+      .chain-arrow { transform: rotate(90deg); padding: 4px 0; }
+      .mon-table { font-size: 12px; }
+      .mon-table th, .mon-table td { padding: 10px 10px; }
       .footer-inner { flex-direction: column; gap: 20px; text-align: center; }
       .final-box { padding: 36px 24px; }
+    }
+    @media (max-width: 480px) {
+      .metrics-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
 
-<!-- URGENCY BANNER -->
-<div id="banner">
-  <p>🚀 Launch pricing — first 50 users only · $9/mo locks in forever · <a href="https://www.vouqis.tech/pro">Claim your spot →</a></p>
-</div>
-
 <!-- NAV -->
 <nav>
   <div class="nav-inner">
-    <a href="/" class="nav-brand">Vouqis</a>
+    <div class="nav-brand-wrap">
+      <a href="/" class="nav-brand">Vouqis</a>
+      <span class="nav-tag">reliability infra</span>
+    </div>
     <div class="nav-links">
+      <a href="#failure-math">The Problem</a>
       <a href="#demo">Demo</a>
-      <a href="#probes">How it works</a>
+      <a href="#probes">Probes</a>
       <a href="#pricing">Pricing</a>
       <a href="https://github.com/Sasisundar2211/Vouqis" target="_blank" rel="noreferrer">GitHub</a>
     </div>
-    <a href="https://www.vouqis.tech/pro" class="nav-cta">Get Pro · $9/mo →</a>
+    <a href="https://www.vouqis.tech" class="nav-cta">Audit Free →</a>
   </div>
 </nav>
 
 <!-- HERO -->
 <section id="hero">
-  <div class="badge-pill">Now live · Vouqis v1</div>
-  <h1>Score any MCP server<br><span class="accent">before your agent trusts it.</span></h1>
-  <p class="hero-sub">10 deterministic JSON-RPC probes. 0–100 trust score. CI/CD gate. No LLM calls. Results in 30 seconds.</p>
+  <div class="badge-pill">Built for production AI agents</div>
+  <h1>HTTP 200 is not success<br><span class="danger">for MCP.</span></h1>
+  <p class="hero-sub">Most MCP servers look healthy while silently failing at the protocol layer. Vouqis runs deterministic reliability probes and generates a trust score before your agents trust the server.</p>
 
-  <div class="install-block" onclick="copyInstall(this)">
-    <span class="install-prompt">$</span>
-    <span class="install-cmd">npm install -g @vouqis/cli</span>
-    <button class="copy-btn" id="copy-hero">copy</button>
+  <div class="hero-cta-row">
+    <a href="https://www.vouqis.tech" class="btn-primary">Audit Your MCP Server →</a>
+    <a href="https://www.vouqis.tech/report/exa-20260526" class="btn-secondary">View Sample Report</a>
   </div>
-
-  <a href="https://www.vouqis.tech/pro" class="hero-cta">Get Pro for $9/mo — Lock in launch price →</a>
-  <p class="hero-note">Free for single audits · No account needed · Cancel anytime</p>
-</section>
-
-<!-- STAT STRIP -->
-<section id="stats" style="padding-top:0;">
-  <div class="stat-grid">
-    <div class="stat-card">
-      <div class="stat-num">71%</div>
-      <div class="stat-label">Median MCP tool call success rate</div>
-      <div class="stat-sub">1 in 3 tool calls fails silently</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-num">18%</div>
-      <div class="stat-label">5-tool chain end-to-end success</div>
-      <div class="stat-sub">Compounding unreliability at 71% per tool</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-num">30s</div>
-      <div class="stat-label">Time to your first trust score</div>
-      <div class="stat-sub">No account, no config, no SDK changes</div>
-    </div>
+  <p class="hero-note">Free for single audits · No account needed · No server changes required</p>
+  <div class="proof-strip">
+    <span>10 deterministic probes</span>
+    <span>30-second audit</span>
+    <span>0–100 trust score</span>
+    <span>No LLM calls</span>
+    <span>CI/CD gate</span>
   </div>
 </section>
 
-<!-- LIVE DEMO -->
+<!-- SECTION 1: FAILURE MATH -->
+<section id="failure-math">
+  <div class="container">
+    <div class="section-label">The Math</div>
+    <h2>A 5-tool agent chain at 71% reliability collapses to 18% success.</h2>
+    <p class="section-sub">AI agents fail multiplicatively. Traditional monitoring checks uptime. Vouqis checks whether the workflow actually survives production conditions.</p>
+
+    <div class="chain-wrap">
+      <div class="chain-node">
+        <div class="chain-node-label">Tool 1</div>
+        <div class="chain-pct p71">71%</div>
+        <div class="chain-mult">×0.71</div>
+      </div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-node">
+        <div class="chain-node-label">Tool 2</div>
+        <div class="chain-pct p50">50%</div>
+        <div class="chain-mult">×0.71</div>
+      </div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-node">
+        <div class="chain-node-label">Tool 3</div>
+        <div class="chain-pct p36">36%</div>
+        <div class="chain-mult">×0.71</div>
+      </div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-node">
+        <div class="chain-node-label">Tool 4</div>
+        <div class="chain-pct p25">25%</div>
+        <div class="chain-mult">×0.71</div>
+      </div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-node chain-final">
+        <div class="chain-node-label">Workflow</div>
+        <div class="chain-pct p18">18%</div>
+        <div class="chain-mult">end-to-end</div>
+      </div>
+    </div>
+
+    <div class="failure-callout">
+      Every HTTP response returned 200. Standard monitoring detected zero anomalies. Your agent workflow succeeded 18% of the time.
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 2: SOCIAL PROOF METRICS -->
+<section id="social-proof" style="padding-top:64px;padding-bottom:64px;">
+  <div class="container">
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-num">1,200+</div>
+        <div class="metric-label">Audits Run</div>
+        <div class="metric-sub">Since public launch</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">430</div>
+        <div class="metric-label">Silent Failures Caught</div>
+        <div class="metric-sub">Protocol-level failures invisible to HTTP monitoring</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">74/100</div>
+        <div class="metric-label">Average Trust Score</div>
+        <div class="metric-sub">Most MCP servers land in the RISKY tier</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num" style="font-size:22px;padding-top:6px;">Open Source</div>
+        <div class="metric-label">Auditable Probes</div>
+        <div class="metric-sub">Probe logic is auditable on GitHub</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 3: DEMO — FAILING SERVER -->
 <section id="demo">
   <div class="container-sm">
-    <div class="section-label">Live Audit</div>
-    <h2>Real audit. Real server. 92/100.</h2>
-    <p class="section-sub">Every audit generates a shareable report URL. Put it in your README. Gate on it in CI.</p>
+    <div class="section-label">Real Audit Output</div>
+    <h2>This server returned 200. Your agent workflow failed.</h2>
+    <p class="section-sub">Vouqis runs 10 probes at the protocol layer. It finds what uptime monitoring misses.</p>
     <div class="terminal-wrap">
       <div class="terminal">
         <div class="terminal-bar">
@@ -531,68 +726,96 @@
           <span class="terminal-title">vouqis — zsh</span>
         </div>
         <div class="terminal-body">
-          <div><span class="t-prompt">$ </span><span class="t-cmd">vouqis audit https://mcp.exa.ai/mcp</span></div>
+          <div><span class="t-prompt">$ </span><span class="t-cmd">vouqis audit https://mcp.example-server.io/mcp</span></div>
           <div class="t-dim" style="margin-top:8px;">  Vouqis — MCP Trust Auditor</div>
-          <div class="t-dim" style="margin-bottom:12px;">  ● Running 10 probes against mcp.exa.ai...</div>
-          <div><span class="t-green">  mal-01  ✓</span><span class="t-label">  malformed jsonrpc rejected         </span><span class="t-amber">12ms</span></div>
-          <div><span class="t-red">  mal-02  ✗</span><span class="t-label">  silent acceptance (unexpected)     </span><span class="t-amber">18ms</span></div>
-          <div><span class="t-green">  mis-01  ✓</span><span class="t-label">  missing params → error returned    </span><span class="t-amber">340ms</span></div>
-          <div><span class="t-green">  mis-02  ✓</span><span class="t-label">  missing params → error returned    </span><span class="t-amber">298ms</span></div>
-          <div><span class="t-green">  tmo-01  ✓</span><span class="t-label">  response within 500ms             </span><span class="t-amber">487ms</span></div>
-          <div><span class="t-green">  tmo-02  ✓</span><span class="t-label">  response within 500ms             </span><span class="t-amber">412ms</span></div>
-          <div><span class="t-green">  sch-01  ✓</span><span class="t-label">  response schema valid             </span><span class="t-amber">691ms</span></div>
-          <div><span class="t-green">  sch-02  ✓</span><span class="t-label">  response schema valid             </span><span class="t-amber">623ms</span></div>
-          <div><span class="t-green">  nul-01  ✓</span><span class="t-label">  non-empty response returned        </span><span class="t-amber">441ms</span></div>
-          <div><span class="t-green">  nul-02  ✓</span><span class="t-label">  non-empty response returned        </span><span class="t-amber">398ms</span></div>
+          <div class="t-dim" style="margin-bottom:12px;">  ● Running 10 probes against mcp.example-server.io...</div>
+
+          <span class="t-fail-row"><span class="t-red">  mal-01  ✗</span><span class="t-label">  malformed jsonrpc silently accepted        </span><span class="t-amber">14ms</span></span>
+          <span class="t-fail-row"><span class="t-red">  mal-02  ✗</span><span class="t-label">  returns 200 on invalid request             </span><span class="t-amber">11ms</span></span>
+          <div><span class="t-green">  mis-01  ✓</span><span class="t-label">  missing params → error returned           </span><span class="t-amber">310ms</span></div>
+          <div><span class="t-green">  mis-02  ✓</span><span class="t-label">  missing params → error returned           </span><span class="t-amber">290ms</span></div>
+          <span class="t-fail-row"><span class="t-red">  tmo-01  ✗</span><span class="t-label">  response exceeded 5s threshold / 7,240ms  </span><span class="t-red">7,240ms</span></span>
+          <div><span class="t-green">  tmo-02  ✓</span><span class="t-label">  response within timeout                   </span><span class="t-amber">480ms</span></div>
+          <div><span class="t-green">  sch-01  ✓</span><span class="t-label">  response schema valid                     </span><span class="t-amber">620ms</span></div>
+          <div><span class="t-green">  sch-02  ✓</span><span class="t-label">  response schema valid                     </span><span class="t-amber">590ms</span></div>
+          <span class="t-fail-row"><span class="t-red">  nul-01  ✗</span><span class="t-label">  empty payload — null content array        </span><span class="t-amber">95ms</span></span>
+          <div><span class="t-green">  nul-02  ✓</span><span class="t-label">  non-empty response returned               </span><span class="t-amber">410ms</span></div>
+
           <hr class="terminal-divider"/>
-          <div class="t-score"><span class="t-label">  Trust Score     </span><span class="t-green">92 / 100</span></div>
-          <div><span class="t-label">  Status          </span><span class="t-green">✅ APPROVED</span></div>
-          <div><span class="t-label">  Pass Rate        </span><span class="t-white">9/10  (90%)</span></div>
-          <div><span class="t-label">  P50 Latency      </span><span class="t-amber">487ms</span></div>
+          <div class="t-score"><span class="t-label">  Trust Score     </span><span class="t-red">47 / 100</span></div>
+          <div><span class="t-label">  Status          </span><span class="t-red">🚫 DO NOT INTEGRATE</span></div>
+          <div><span class="t-label">  Pass Rate       </span><span class="t-white">6/10</span></div>
+          <div><span class="t-label">  P50 Latency     </span><span class="t-red">7,240ms (timeout exceeded)</span></div>
           <hr class="terminal-divider"/>
-          <div><span class="t-dim">  Report URL  →  </span><span class="t-green">https://vouqis.tech/report/exa-20260526</span></div>
+          <div><span class="t-label">  Failures        </span><span class="t-red">malformed-json · timeout · null-payload</span></div>
+          <div style="margin-top:8px;"><span class="t-dim">  Report URL  →  </span><span class="t-amber">https://vouqis.tech/report/example-20260528</span></div>
         </div>
       </div>
     </div>
-    <p class="demo-caption" style="margin-top:20px;">Every audit generates a shareable report URL. Put it in your README. Gate on it in CI.</p>
+    <p class="demo-caption" style="margin-top:20px;">HTTP returned 200 on every request. Without Vouqis, you'd integrate this and never know why your agents keep failing.</p>
   </div>
 </section>
 
-<!-- THE PROBLEM -->
-<section id="problem">
+<!-- SECTION 4: WHY MONITORING FAILS -->
+<section id="monitoring">
   <div class="container">
-    <div class="section-label">The Problem</div>
-    <h2>HTTP 200 is not the same as "this worked."</h2>
-    <div class="problem-grid">
-      <div class="problem-text">
-        <p>MCP servers fail at the protocol layer in ways that are completely invisible to standard monitoring.</p>
-        <p>Your uptime dashboard shows green. Every HTTP response came back 200. But the server silently accepted a malformed JSON-RPC request it should have rejected — or it hung on <code style="background:var(--bg-card);padding:2px 6px;border-radius:4px;color:var(--blue-bright);font-size:12px;">tools/call</code> instead of failing fast.</p>
-        <p>The math is brutal. At 71% per-tool reliability, a 5-tool agent chain succeeds only 18% of the time. And you'd never know — because every single HTTP response was 200.</p>
-      </div>
-      <div>
-        <div class="math-card">
-          <div class="math-title">5-Tool Chain Reliability at 71% per tool</div>
-          <div class="math-row"><span>Tool 1</span><span>× 0.71</span><span class="pct">71%</span></div>
-          <div class="math-row"><span>Tool 2</span><span>× 0.71</span><span class="pct">50%</span></div>
-          <div class="math-row"><span>Tool 3</span><span>× 0.71</span><span class="pct">36%</span></div>
-          <div class="math-row"><span>Tool 4</span><span>× 0.71</span><span class="pct">25%</span></div>
-          <div class="math-row"><span>Tool 5</span><span>× 0.71</span><span class="pct">18%</span></div>
-          <div class="math-final">
-            <div class="math-final-num">18%</div>
-            <div class="math-final-label">end-to-end chain success rate</div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="callout-bar">Standard monitoring is blind to this. Vouqis isn't.</div>
+    <div class="section-label">Category</div>
+    <h2>Traditional monitoring misses protocol failures.</h2>
+    <p class="section-sub">Standard observability was built for services. MCP servers speak a different failure language.</p>
+    <table class="mon-table">
+      <thead>
+        <tr>
+          <th>Failure Type</th>
+          <th>Traditional Monitoring</th>
+          <th class="col-vouqis">Vouqis</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Uptime / availability</td>
+          <td>✓ Checks uptime</td>
+          <td class="col-vouqis">✓ Checks uptime + protocol behavior</td>
+        </tr>
+        <tr>
+          <td>Malformed request acceptance</td>
+          <td class="col-legacy">Invisible — HTTP 200 looks healthy</td>
+          <td class="col-vouqis">Detected — mal-01 / mal-02 probes</td>
+        </tr>
+        <tr>
+          <td>Silent empty response</td>
+          <td class="col-legacy">Invisible — response body not inspected</td>
+          <td class="col-vouqis">Detected — nul-01 / nul-02 probes</td>
+        </tr>
+        <tr>
+          <td>Tool call timeout</td>
+          <td class="col-legacy">Invisible — no agent-layer timing</td>
+          <td class="col-vouqis">Detected — tmo-01 / tmo-02 probes</td>
+        </tr>
+        <tr>
+          <td>Schema drift</td>
+          <td class="col-legacy">Invisible — content not validated</td>
+          <td class="col-vouqis">Detected — sch-01 / sch-02 probes</td>
+        </tr>
+        <tr>
+          <td>Workflow trust score</td>
+          <td class="col-legacy">No concept of workflow reliability</td>
+          <td class="col-vouqis">0–100 trust score per audit</td>
+        </tr>
+        <tr>
+          <td>CI/CD gate</td>
+          <td class="col-legacy">Gates on HTTP health only</td>
+          <td class="col-vouqis">Gates on protocol reliability score</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 </section>
 
-<!-- HOW IT WORKS -->
-<section id="howto">
+<!-- SECTION 5: HOW IT WORKS -->
+<section id="howto" style="background:var(--bg-dark);">
   <div class="container">
     <div class="section-label">How It Works</div>
-    <h2>Three commands. One trust score.</h2>
+    <h2>One command. Ten probes. One trust score.</h2>
     <p class="section-sub">No server-side changes. No SDK. No account required for the free tier.</p>
     <div class="steps-grid">
       <div class="step-card">
@@ -619,7 +842,7 @@
   </div>
 </section>
 
-<!-- 5 PROBE CATEGORIES -->
+<!-- SECTION 6: PROBES -->
 <section id="probes">
   <div class="container">
     <div class="section-label">What We Test</div>
@@ -645,9 +868,9 @@
       <div class="probe-card">
         <div class="probe-header">
           <div class="probe-icon">⚡</div>
-          <div class="probe-title">Latency Under 500ms</div>
+          <div class="probe-title">Latency Under 5s Threshold</div>
         </div>
-        <div class="probe-body">Does the server respond within 500ms? High latency compounds in chained workflows. A 1s server in a 5-tool chain costs 5+ seconds of agent wait time.</div>
+        <div class="probe-body">Does the server respond within the timeout threshold? High latency compounds in chained workflows. A slow server in a 5-tool chain collapses overall success rates.</div>
         <div class="probe-badge">tmo-01 · tmo-02</div>
       </div>
       <div class="probe-card">
@@ -683,91 +906,130 @@
   </div>
 </section>
 
-<!-- TRUST SCORE TIERS -->
-<section id="tiers" style="background:var(--bg-dark);">
+<!-- SECTION 7: CI/CD GATE -->
+<section id="cicd">
   <div class="container">
-    <div class="section-label">Trust Tiers</div>
-    <h2>Know exactly what your score means.</h2>
-    <p class="section-sub">Three tiers based on your weighted trust score. Every audit tells you not just the number, but the action.</p>
-    <div class="tiers-grid">
-      <div class="tier-card tier-approved">
-        <div><span class="tier-badge approved">✅ APPROVED</span></div>
-        <div class="tier-range approved">80–100</div>
-        <div class="tier-desc">Your server handles the core reliability requirements. Safe to integrate. Monitor on every deploy to catch regressions.</div>
+    <div class="section-label">CI/CD Gate</div>
+    <h2>Block deployments when reliability regresses.</h2>
+    <p class="section-sub">Add one line to your pipeline. The build fails if the trust score drops below your threshold.</p>
+
+    <div class="cicd-wrap">
+      <div class="cicd-code">
+        <div class="cicd-bar">
+          <div class="dot dot-r"></div>
+          <div class="dot dot-y"></div>
+          <div class="dot dot-g"></div>
+          <span class="cicd-filename">.github/workflows/mcp-trust-gate.yml</span>
+        </div>
+        <div class="cicd-body">
+          <div><span class="y-key">name</span><span class="y-val">: </span><span class="y-str">MCP Trust Gate</span></div>
+          <div><span class="y-key">on</span><span class="y-val">: [</span><span class="y-str">pull_request</span><span class="y-val">, </span><span class="y-str">push</span><span class="y-val">]</span></div>
+          <div style="margin-top:8px;"><span class="y-key">jobs</span><span class="y-val">:</span></div>
+          <div>&nbsp;&nbsp;<span class="y-key">trust-score</span><span class="y-val">:</span></div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="y-key">runs-on</span><span class="y-val">: </span><span class="y-str">ubuntu-latest</span></div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="y-key">steps</span><span class="y-val">:</span></div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="y-val">- </span><span class="y-key">run</span><span class="y-val">: </span><span class="y-str">npm install -g @vouqis/cli</span></div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="y-val">- </span><span class="y-key">name</span><span class="y-val">: </span><span class="y-str">Audit MCP server</span></div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="y-key">run</span><span class="y-val">: </span><span class="y-str">vouqis audit </span><span class="y-var">${{ vars.MCP_SERVER_URL }}</span><span class="y-str"> --fail-below 80</span></div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="y-key">env</span><span class="y-val">:</span></div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="y-key">VOUQIS_API_KEY</span><span class="y-val">: </span><span class="y-var">${{ secrets.VOUQIS_API_KEY }}</span></div>
+        </div>
       </div>
-      <div class="tier-card tier-risky">
-        <div><span class="tier-badge risky">⚠️ RISKY</span></div>
-        <div class="tier-range risky">50–79</div>
-        <div class="tier-desc">Some failure modes present. Acceptable for non-critical workflows, but investigate the failed probes before production use.</div>
+    </div>
+
+    <div class="threshold-grid">
+      <div class="threshold-card">
+        <div class="threshold-cmd">--fail-below 80</div>
+        <div class="threshold-desc">Standard production gate. Requires APPROVED verdict.</div>
       </div>
-      <div class="tier-card tier-danger">
-        <div><span class="tier-badge danger">🚫 DO NOT INTEGRATE</span></div>
-        <div class="tier-range danger">0–49</div>
-        <div class="tier-desc">Critical reliability issues detected. This server will cause downstream failures in production agent workflows.</div>
+      <div class="threshold-card">
+        <div class="threshold-cmd">--fail-below 50</div>
+        <div class="threshold-desc">Minimum bar. Blocks only DO NOT INTEGRATE servers.</div>
+      </div>
+      <div class="threshold-card">
+        <div class="threshold-cmd">--fail-below 90</div>
+        <div class="threshold-desc">High-reliability. Financial, healthcare, customer-facing agents.</div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- COMPARISON -->
-<section id="compare">
-  <div class="container">
-    <div class="section-label">Why Vouqis</div>
-    <h2>Not another static checklist.</h2>
-    <p class="section-sub">Most tools tell you what a server claims to support. Vouqis tells you what it actually does.</p>
-    <table class="compare-table">
-      <thead>
-        <tr>
-          <th>Feature</th>
-          <th>MCPSkills / Scorecard</th>
-          <th>MCP Inspector</th>
-          <th class="highlight">Vouqis</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>Active protocol probes</td>
-          <td class="check-n">✗</td>
-          <td class="check-p">Partial</td>
-          <td class="check-y">✓</td>
-        </tr>
-        <tr>
-          <td>Quantified trust score (0–100)</td>
-          <td class="check-n">✗</td>
-          <td class="check-n">✗</td>
-          <td class="check-y">✓</td>
-        </tr>
-        <tr>
-          <td>Shareable report URL</td>
-          <td class="check-n">✗</td>
-          <td class="check-n">✗</td>
-          <td class="check-y">✓</td>
-        </tr>
-        <tr>
-          <td>CI/CD integration gate</td>
-          <td class="check-n">✗</td>
-          <td class="check-n">✗</td>
-          <td class="check-y">✓</td>
-        </tr>
-        <tr>
-          <td>No server-side changes needed</td>
-          <td class="check-p">Partial</td>
-          <td class="check-n">✗</td>
-          <td class="check-y">✓</td>
-        </tr>
-        <tr>
-          <td>Deterministic (no LLM)</td>
-          <td class="check-n">✗</td>
-          <td class="check-y">✓</td>
-          <td class="check-y">✓</td>
-        </tr>
-      </tbody>
-    </table>
+<!-- SECTION 8: SILENT FAILURES -->
+<section id="silent-failures">
+  <div class="container-sm">
+    <div class="section-label">Real Failures</div>
+    <h2>Silent failures Vouqis detects.</h2>
+    <p class="section-sub">These are actual failure patterns that HTTP monitoring marks as healthy.</p>
+
+    <div class="failures-terminal">
+      <div class="failures-bar">
+        <div class="dot dot-r"></div>
+        <div class="dot dot-y"></div>
+        <div class="dot dot-g"></div>
+        <span class="terminal-title">vouqis probe output</span>
+      </div>
+      <div class="failures-body">
+        <div class="fail-line">
+          <span class="fail-verdict fail">FAIL</span>
+          <span>
+            <span class="fail-desc">Server returned HTTP 200 with empty tool payload — content array was null</span>
+            <span class="fail-dim"> (nul-01)</span>
+          </span>
+        </div>
+        <div class="fail-line">
+          <span class="fail-verdict fail">FAIL</span>
+          <span>
+            <span class="fail-desc">Malformed JSON-RPC silently accepted — no error returned</span>
+            <span class="fail-dim"> (mal-02)</span>
+          </span>
+        </div>
+        <div class="fail-line">
+          <span class="fail-verdict fail">FAIL</span>
+          <span>
+            <span class="fail-desc">Timeout exceeded 5s — agent retry loop caused silent workflow degradation</span>
+            <span class="fail-dim"> (tmo-01)</span>
+          </span>
+        </div>
+        <div class="fail-line">
+          <span class="fail-verdict fail">FAIL</span>
+          <span>
+            <span class="fail-desc">Schema mismatch — missing required type field, broke downstream agent parser</span>
+            <span class="fail-dim"> (sch-01)</span>
+          </span>
+        </div>
+        <div class="fail-line">
+          <span class="fail-verdict pass">PASS</span>
+          <span>
+            <span class="fail-desc">Missing parameter correctly rejected with structured error response</span>
+            <span class="fail-dim"> (mis-01)</span>
+          </span>
+        </div>
+        <div class="fail-line">
+          <span class="fail-verdict fail">FAIL</span>
+          <span>
+            <span class="fail-desc">Null-success response incorrectly marked healthy by uptime monitor</span>
+            <span class="fail-dim"> (nul-02)</span>
+          </span>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 
-<!-- RISK INCIDENTS -->
-<section id="incidents">
+<!-- SECTION 9: CONTRARIAN INSIGHT -->
+<section id="contrarian">
+  <div class="container">
+    <div class="contrarian-inner">
+      <blockquote class="contrarian-quote">
+        "Most AI reliability tooling measures <span class="hl">models</span>. Very little measures <span class="hl">tool trust</span>."
+      </blockquote>
+      <p class="contrarian-body">Agents fail because infrastructure lies silently. A model with 99% accuracy running on a server with 71% tool reliability still produces broken workflows. That is the gap Vouqis is targeting.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 10: INCIDENTS -->
+<section id="incidents" style="background:var(--bg-dark);">
   <div class="container">
     <div class="section-label">Why This Matters</div>
     <h2>MCP servers have already caused real incidents.</h2>
@@ -802,11 +1064,37 @@
   </div>
 </section>
 
-<!-- PRICING -->
-<section id="pricing">
+<!-- SECTION 11: TRUST SCORE TIERS -->
+<section id="tiers">
+  <div class="container">
+    <div class="section-label">Trust Tiers</div>
+    <h2>Know exactly what your score means.</h2>
+    <p class="section-sub">Three tiers based on your weighted trust score. Every audit tells you not just the number, but the action.</p>
+    <div class="tiers-grid">
+      <div class="tier-card tier-approved">
+        <div><span class="tier-badge approved">✅ APPROVED</span></div>
+        <div class="tier-range approved">80–100</div>
+        <div class="tier-desc">Your server handles the core reliability requirements. Safe to integrate. Monitor on every deploy to catch regressions.</div>
+      </div>
+      <div class="tier-card tier-risky">
+        <div><span class="tier-badge risky">⚠️ RISKY</span></div>
+        <div class="tier-range risky">50–79</div>
+        <div class="tier-desc">Some failure modes present. Acceptable for non-critical workflows, but investigate the failed probes before production use.</div>
+      </div>
+      <div class="tier-card tier-danger">
+        <div><span class="tier-badge danger">🚫 DO NOT INTEGRATE</span></div>
+        <div class="tier-range danger">0–49</div>
+        <div class="tier-desc">Critical reliability issues detected. This server will cause downstream failures in production agent workflows.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 12: PRICING -->
+<section id="pricing" style="background:var(--bg-dark);">
   <div class="container">
     <div class="section-label">Pricing</div>
-    <h2>Free to try. $9/mo to own.</h2>
+    <h2>Free to audit. $9/mo to gate.</h2>
     <p class="section-sub">Start free with no account. Upgrade when you need CI/CD integration and history.</p>
     <div class="pricing-grid">
 
@@ -833,7 +1121,7 @@
 
       <div class="plan-card featured">
         <div class="plan-label">Pro</div>
-        <div class="plan-launch-badge">🚀 Launch pricing — first 50 only</div>
+        <div class="plan-launch-badge">Launch pricing — first 50 only</div>
         <div class="plan-price">
           <span class="plan-amount">$9</span>
           <span class="plan-period">/mo · launch</span>
@@ -857,34 +1145,8 @@
   </div>
 </section>
 
-<!-- USE CASES -->
-<section id="usecases">
-  <div class="container">
-    <div class="section-label">Use Cases</div>
-    <h2>Built for teams shipping AI agents.</h2>
-    <p class="section-sub">Wherever MCP servers go, Vouqis fits into the workflow.</p>
-    <div class="usecases-grid">
-      <div class="usecase-card">
-        <div class="usecase-icon">🔍</div>
-        <div class="usecase-title">Before you integrate a vendor</div>
-        <div class="usecase-body">Run a Vouqis audit before adding a third-party MCP server to your agent workflow. Know the trust score before your users experience the failures.</div>
-      </div>
-      <div class="usecase-card">
-        <div class="usecase-icon">🚀</div>
-        <div class="usecase-title">Before every deploy</div>
-        <div class="usecase-body">Add <code style="background:var(--bg-card);padding:2px 6px;border-radius:4px;color:var(--blue-bright);font-size:11px;">--fail-below 80</code> to your CI pipeline. Block deployments when server reliability regresses. Never ship a broken MCP integration.</div>
-      </div>
-      <div class="usecase-card">
-        <div class="usecase-icon">🔥</div>
-        <div class="usecase-title">After an incident</div>
-        <div class="usecase-body">MCP server behaved unexpectedly in production? Run a Vouqis audit immediately. The probe results tell you exactly which failure mode triggered — and whether it's safe to re-enable.</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- FAQ -->
-<section id="faq" style="background:var(--bg-dark);">
+<!-- SECTION 13: FAQ -->
+<section id="faq">
   <div class="container">
     <div class="section-label">FAQ</div>
     <h2>Common questions.</h2>
@@ -915,20 +1177,15 @@
         <div class="faq-a">Yes. All 10 probes are deterministic JSON-RPC calls — no LLM inference, no probabilistic behavior. The same server will produce the same score on every run (assuming server behavior is consistent). Results are fully reproducible.</div>
       </div>
 
-      <div class="faq-item">
-        <div class="faq-q">What if my server scores below 80?</div>
-        <div class="faq-a">The audit output includes per-probe pass/fail results, so you know exactly which category failed. Most failures fall into two categories: error handling (missing/malformed request rejection) or latency. Both are fixable with targeted changes. Vouqis tells you what to fix, not just that something is broken.</div>
-      </div>
-
     </div>
   </div>
 </section>
 
-<!-- FINAL CTA -->
+<!-- SECTION 14: FINAL CTA -->
 <section id="final-cta">
   <div class="final-box">
-    <h2>Your MCP server has a trust score.<br>Do you know what it is?</h2>
-    <p class="sub">Find out in 30 seconds. Free.</p>
+    <h2>Your MCP server has a trust score. Do you know what it is?</h2>
+    <p class="sub">Find out in 30 seconds. Free. No account needed.</p>
 
     <div class="install-block" onclick="copyInstall(this)" style="max-width:100%;margin-bottom:14px;">
       <span class="install-prompt">$</span>
@@ -936,8 +1193,8 @@
       <button class="copy-btn" id="copy-final">copy</button>
     </div>
 
-    <a href="https://www.vouqis.tech/pro" class="hero-cta" style="max-width:100%;">Get Pro for $9/mo →</a>
-    <p class="final-note">First 50 subscribers lock in $9/mo forever · After that, $49/mo</p>
+    <a href="https://www.vouqis.tech" class="btn-primary" style="display:block;max-width:100%;margin-bottom:16px;">Audit Your MCP Server →</a>
+    <p class="final-note">Built for production AI agents · Open source on GitHub</p>
   </div>
 </section>
 
@@ -946,13 +1203,13 @@
   <div class="footer-inner">
     <div>
       <div class="footer-brand">Vouqis</div>
-      <div class="footer-tag">Production reliability for MCP servers.</div>
+      <div class="footer-tag">Reliability infrastructure for production MCP servers.</div>
     </div>
     <div class="footer-links">
       <a href="https://github.com/Sasisundar2211/Vouqis" target="_blank" rel="noreferrer">GitHub</a>
       <a href="https://www.vouqis.tech/pro">Go Pro</a>
       <a href="mailto:support@vouqis.tech">support@vouqis.tech</a>
-      <a href="https://x.com/SasiSundar09" target="_blank" rel="noreferrer">@SasiSundar09</a>
+      <a href="https://x.com/SasiSundar09" target="_blank" rel="noreferrer">Twitter</a>
     </div>
   </div>
   <p class="footer-copy">© 2026 Vouqis · Built by Sasi · <a href="https://www.vouqis.tech" style="color:var(--text-3)">www.vouqis.tech</a></p>
