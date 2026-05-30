@@ -618,6 +618,7 @@
   </div>
 </nav>
 
+
 <!-- HERO -->
 <section id="hero">
   <div class="badge-pill">Built for production AI agents</div>
@@ -638,10 +639,48 @@
   </div>
 </section>
 
-<!-- SECTION 1: FAILURE MATH -->
+
+<!-- SECTION: THE PROBLEM -->
+<section id="incidents">
+  <div class="container">
+    <div class="section-label">The Problem</div>
+    <h2>HTTP 200 doesn't mean it worked.</h2>
+    <p class="section-sub">These are real incidents. Every one of them returned 200 OK while the MCP server was broken.</p>
+    <div class="incidents-grid">
+      <div class="incident-card">
+        <div class="incident-title">Asana MCP — Customer Data Exposure</div>
+        <div class="incident-body">Malformed tool call responses exposed customer data. The issue persisted for 2 weeks before detection. Standard monitoring showed zero anomalies throughout.</div>
+        <div class="incident-tags">
+          <span class="tag">data exposure</span>
+          <span class="tag">2-week persistence</span>
+        </div>
+      </div>
+      <div class="incident-card">
+        <div class="incident-title">Smithery Path Traversal</div>
+        <div class="incident-body">Path traversal vulnerability affecting 3,243 MCP servers simultaneously. Discoverable via protocol-layer probing — completely invisible to standard HTTP monitoring.</div>
+        <div class="incident-tags">
+          <span class="tag">path traversal</span>
+          <span class="tag">3,243 servers</span>
+        </div>
+      </div>
+      <div class="incident-card">
+        <div class="incident-title">mcp-remote CVE-2025-6514</div>
+        <div class="incident-body">Remote code execution vulnerability, CVSS score 9.6. The behavioral signature — malformed-request acceptance — is exactly what Vouqis probes for at the protocol layer.</div>
+        <div class="incident-tags">
+          <span class="tag">RCE</span>
+          <span class="tag">CVSS 9.6</span>
+        </div>
+      </div>
+    </div>
+    <p class="incident-note">Vouqis doesn't prevent these vulnerabilities. It detects the behavioral signatures that indicate a server isn't handling edge cases correctly — before you integrate it.</p>
+  </div>
+</section>
+
+
+<!-- SECTION: FAILURE MATH -->
 <section id="failure-math">
   <div class="container">
-    <div class="section-label">The Math</div>
+    <div class="section-label">Failure Math</div>
     <h2>A 5-tool agent chain at 71% reliability collapses to 18% success.</h2>
     <p class="section-sub">AI agents fail multiplicatively. Traditional monitoring checks uptime. Vouqis checks whether the workflow actually survives production conditions.</p>
 
@@ -683,38 +722,11 @@
   </div>
 </section>
 
-<!-- SECTION 2: SOCIAL PROOF METRICS -->
-<section id="social-proof" style="padding-top:64px;padding-bottom:64px;">
-  <div class="container">
-    <div class="metrics-grid">
-      <div class="metric-card">
-        <div class="metric-num">1,200+</div>
-        <div class="metric-label">Audits Run</div>
-        <div class="metric-sub">Since public launch</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-num">430</div>
-        <div class="metric-label">Silent Failures Caught</div>
-        <div class="metric-sub">Protocol-level failures invisible to HTTP monitoring</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-num">74/100</div>
-        <div class="metric-label">Average Trust Score</div>
-        <div class="metric-sub">Most MCP servers land in the RISKY tier</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-num" style="font-size:22px;padding-top:6px;">Open Source</div>
-        <div class="metric-label">Auditable Probes</div>
-        <div class="metric-sub">Probe logic is auditable on GitHub</div>
-      </div>
-    </div>
-  </div>
-</section>
 
-<!-- SECTION 3: DEMO — FAILING SERVER -->
+<!-- SECTION: DEMO -->
 <section id="demo">
   <div class="container-sm">
-    <div class="section-label">Real Audit Output</div>
+    <div class="section-label">See It Run</div>
     <h2>This server returned 200. Your agent workflow failed.</h2>
     <p class="section-sub">Vouqis runs 10 probes at the protocol layer. It finds what uptime monitoring misses.</p>
     <div class="terminal-wrap">
@@ -756,97 +768,12 @@
   </div>
 </section>
 
-<!-- SECTION 4: WHY MONITORING FAILS -->
-<section id="monitoring">
-  <div class="container">
-    <div class="section-label">Category</div>
-    <h2>Traditional monitoring misses protocol failures.</h2>
-    <p class="section-sub">Standard observability was built for services. MCP servers speak a different failure language.</p>
-    <table class="mon-table">
-      <thead>
-        <tr>
-          <th>Failure Type</th>
-          <th>Traditional Monitoring</th>
-          <th class="col-vouqis">Vouqis</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>Uptime / availability</td>
-          <td>✓ Checks uptime</td>
-          <td class="col-vouqis">✓ Checks uptime + protocol behavior</td>
-        </tr>
-        <tr>
-          <td>Malformed request acceptance</td>
-          <td class="col-legacy">Invisible — HTTP 200 looks healthy</td>
-          <td class="col-vouqis">Detected — mal-01 / mal-02 probes</td>
-        </tr>
-        <tr>
-          <td>Silent empty response</td>
-          <td class="col-legacy">Invisible — response body not inspected</td>
-          <td class="col-vouqis">Detected — nul-01 / nul-02 probes</td>
-        </tr>
-        <tr>
-          <td>Tool call timeout</td>
-          <td class="col-legacy">Invisible — no agent-layer timing</td>
-          <td class="col-vouqis">Detected — tmo-01 / tmo-02 probes</td>
-        </tr>
-        <tr>
-          <td>Schema drift</td>
-          <td class="col-legacy">Invisible — content not validated</td>
-          <td class="col-vouqis">Detected — sch-01 / sch-02 probes</td>
-        </tr>
-        <tr>
-          <td>Workflow trust score</td>
-          <td class="col-legacy">No concept of workflow reliability</td>
-          <td class="col-vouqis">0–100 trust score per audit</td>
-        </tr>
-        <tr>
-          <td>CI/CD gate</td>
-          <td class="col-legacy">Gates on HTTP health only</td>
-          <td class="col-vouqis">Gates on protocol reliability score</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-</section>
 
-<!-- SECTION 5: HOW IT WORKS -->
-<section id="howto" style="background:var(--bg-dark);">
-  <div class="container">
-    <div class="section-label">How It Works</div>
-    <h2>One command. Ten probes. One trust score.</h2>
-    <p class="section-sub">No server-side changes. No SDK. No account required for the free tier.</p>
-    <div class="steps-grid">
-      <div class="step-card">
-        <div class="step-num">01 — Install</div>
-        <div class="step-title">Install the CLI</div>
-        <div class="step-code">npm install -g @vouqis/cli</div>
-        <div class="step-sub">One command. No account required. Works anywhere Node.js 18+ runs — macOS, Linux, Windows.</div>
-      </div>
-      <div class="step-card">
-        <div class="step-num">02 — Audit</div>
-        <div class="step-title">Audit any MCP server</div>
-        <div class="step-code">vouqis audit \
-  https://your-mcp-server</div>
-        <div class="step-sub">10 protocol-layer probes. Results in under 30 seconds. A shareable report URL is generated automatically.</div>
-      </div>
-      <div class="step-card">
-        <div class="step-num">03 — Gate</div>
-        <div class="step-title">Gate your CI/CD pipeline</div>
-        <div class="step-code">vouqis audit $MCP_URL \
-  --fail-below 80</div>
-        <div class="step-sub">Exit code 1 if trust score drops below your threshold. Block deployments when reliability regresses.</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- SECTION 6: PROBES -->
+<!-- SECTION: WHAT IT TESTS -->
 <section id="probes">
   <div class="container">
-    <div class="section-label">What We Test</div>
-    <h2>10 probes across 5 failure modes.</h2>
+    <div class="section-label">What It Tests</div>
+    <h2>10 probes. 5 failure modes. No LLM calls.</h2>
     <p class="section-sub">Every probe tests a real-world failure pattern observed in production MCP servers. No LLM calls — results are fully deterministic.</p>
     <div class="probes-grid">
       <div class="probe-card">
@@ -906,7 +833,8 @@
   </div>
 </section>
 
-<!-- SECTION 7: CI/CD GATE -->
+
+<!-- SECTION: CI/CD GATE -->
 <section id="cicd">
   <div class="container">
     <div class="section-label">CI/CD Gate</div>
@@ -954,7 +882,181 @@
   </div>
 </section>
 
-<!-- SECTION 8: SILENT FAILURES -->
+
+<!-- SECTION: PRICING -->
+<section id="pricing" style="background:var(--bg-dark);">
+  <div class="container">
+    <div class="section-label">Pricing</div>
+    <h2>Free to audit. $9/mo to gate.</h2>
+    <p class="section-sub">Start free with no account. Upgrade when you need CI/CD integration and history. Enterprise teams close in weeks, not quarters.</p>
+    <div class="pricing-grid">
+
+      <div class="plan-card">
+        <div class="plan-label">Free</div>
+        <div class="plan-price">
+          <span class="plan-free">$0</span>
+        </div>
+        <div class="plan-sub">Forever free · No account needed</div>
+        <ul class="plan-features">
+          <li><span class="fi fi-y">✓</span> Single audit runs</li>
+          <li><span class="fi fi-y">✓</span> 30-day report history</li>
+          <li><span class="fi fi-y">✓</span> Public shareable reports</li>
+          <li><span class="fi fi-y">✓</span> All 10 probes</li>
+          <li><span class="fi fi-y">✓</span> Trust score + tier</li>
+          <li><span class="fi fi-n">—</span> API key for CI/CD</li>
+          <li><span class="fi fi-n">—</span> 90-day history</li>
+          <li><span class="fi fi-n">—</span> --fail-below flag</li>
+        </ul>
+        <div class="plan-btn secondary" onclick="copyInstall()" style="display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;">
+          <code style="font-family:var(--mono);font-size:12px;color:var(--blue-bright);">npm install -g @vouqis/cli</code>
+        </div>
+      </div>
+
+      <div class="plan-card featured">
+        <div class="plan-label">Pro</div>
+        <div class="plan-launch-badge">Launch pricing — first 50 only</div>
+        <div class="plan-price">
+          <span class="plan-amount">$9</span>
+          <span class="plan-period">/mo · launch</span>
+          <span class="plan-strike">$49</span>
+        </div>
+        <div class="plan-sub">Lock in forever · Cancel anytime</div>
+        <ul class="plan-features">
+          <li><span class="fi fi-y">✓</span> Everything in Free</li>
+          <li><span class="fi fi-y">✓</span> 90-day report history</li>
+          <li><span class="fi fi-y">✓</span> Unlimited audit runs</li>
+          <li><span class="fi fi-y">✓</span> API key for CI/CD pipelines</li>
+          <li><span class="fi fi-y">✓</span> --fail-below flag (CI/CD gate)</li>
+          <li><span class="fi fi-y">✓</span> Private reports <span class="coming">coming soon</span></li>
+          <li><span class="fi fi-y">✓</span> Slack alerts on regression <span class="coming">coming soon</span></li>
+          <li><span class="fi fi-y">✓</span> Priority support</li>
+        </ul>
+        <a href="https://www.vouqis.tech/pro" class="plan-btn primary">Get Pro for $9/mo →</a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ADDITIONAL SECTION 2: SOCIAL PROOF METRICS -->
+<section id="social-proof" style="padding-top:64px;padding-bottom:64px;">
+  <div class="container">
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-num">1,200+</div>
+        <div class="metric-label">Audits Run</div>
+        <div class="metric-sub">Since public launch</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">430</div>
+        <div class="metric-label">Silent Failures Caught</div>
+        <div class="metric-sub">Protocol-level failures invisible to HTTP monitoring</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">74/100</div>
+        <div class="metric-label">Average Trust Score</div>
+        <div class="metric-sub">Most MCP servers land in the RISKY tier</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num" style="font-size:22px;padding-top:6px;">Open Source</div>
+        <div class="metric-label">Auditable Probes</div>
+        <div class="metric-sub">Probe logic is auditable on GitHub</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ADDITIONAL SECTION 4: WHY MONITORING FAILS -->
+<section id="monitoring">
+  <div class="container">
+    <div class="section-label">Category</div>
+    <h2>Traditional monitoring misses protocol failures.</h2>
+    <p class="section-sub">Standard observability was built for services. MCP servers speak a different failure language.</p>
+    <table class="mon-table">
+      <thead>
+        <tr>
+          <th>Failure Type</th>
+          <th>Traditional Monitoring</th>
+          <th class="col-vouqis">Vouqis</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Uptime / availability</td>
+          <td>✓ Checks uptime</td>
+          <td class="col-vouqis">✓ Checks uptime + protocol behavior</td>
+        </tr>
+        <tr>
+          <td>Malformed request acceptance</td>
+          <td class="col-legacy">Invisible — HTTP 200 looks healthy</td>
+          <td class="col-vouqis">Detected — mal-01 / mal-02 probes</td>
+        </tr>
+        <tr>
+          <td>Silent empty response</td>
+          <td class="col-legacy">Invisible — response body not inspected</td>
+          <td class="col-vouqis">Detected — nul-01 / nul-02 probes</td>
+        </tr>
+        <tr>
+          <td>Tool call timeout</td>
+          <td class="col-legacy">Invisible — no agent-layer timing</td>
+          <td class="col-vouqis">Detected — tmo-01 / tmo-02 probes</td>
+        </tr>
+        <tr>
+          <td>Schema drift</td>
+          <td class="col-legacy">Invisible — content not validated</td>
+          <td class="col-vouqis">Detected — sch-01 / sch-02 probes</td>
+        </tr>
+        <tr>
+          <td>Workflow trust score</td>
+          <td class="col-legacy">No concept of workflow reliability</td>
+          <td class="col-vouqis">0–100 trust score per audit</td>
+        </tr>
+        <tr>
+          <td>CI/CD gate</td>
+          <td class="col-legacy">Gates on HTTP health only</td>
+          <td class="col-vouqis">Gates on protocol reliability score</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+
+<!-- ADDITIONAL SECTION 5: HOW IT WORKS -->
+<section id="howto" style="background:var(--bg-dark);">
+  <div class="container">
+    <div class="section-label">How It Works</div>
+    <h2>One command. Ten probes. One trust score.</h2>
+    <p class="section-sub">No server-side changes. No SDK. No account required for the free tier.</p>
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-num">01 — Install</div>
+        <div class="step-title">Install the CLI</div>
+        <div class="step-code">npm install -g @vouqis/cli</div>
+        <div class="step-sub">One command. No account required. Works anywhere Node.js 18+ runs — macOS, Linux, Windows.</div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">02 — Audit</div>
+        <div class="step-title">Audit any MCP server</div>
+        <div class="step-code">vouqis audit \
+  https://your-mcp-server</div>
+        <div class="step-sub">10 protocol-layer probes. Results in under 30 seconds. A shareable report URL is generated automatically.</div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">03 — Gate</div>
+        <div class="step-title">Gate your CI/CD pipeline</div>
+        <div class="step-code">vouqis audit $MCP_URL \
+  --fail-below 80</div>
+        <div class="step-sub">Exit code 1 if trust score drops below your threshold. Block deployments when reliability regresses.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ADDITIONAL SECTION 8: SILENT FAILURES -->
 <section id="silent-failures">
   <div class="container-sm">
     <div class="section-label">Real Failures</div>
@@ -1016,7 +1118,8 @@
   </div>
 </section>
 
-<!-- SECTION 9: CONTRARIAN INSIGHT -->
+
+<!-- ADDITIONAL SECTION 9: CONTRARIAN INSIGHT -->
 <section id="contrarian">
   <div class="container">
     <div class="contrarian-inner">
@@ -1028,43 +1131,8 @@
   </div>
 </section>
 
-<!-- SECTION 10: INCIDENTS -->
-<section id="incidents" style="background:var(--bg-dark);">
-  <div class="container">
-    <div class="section-label">Why This Matters</div>
-    <h2>MCP servers have already caused real incidents.</h2>
-    <p class="section-sub">These aren't hypotheticals. These are production failures that affected real users and systems.</p>
-    <div class="incidents-grid">
-      <div class="incident-card">
-        <div class="incident-title">Asana MCP — Customer Data Exposure</div>
-        <div class="incident-body">Malformed tool call responses exposed customer data. The issue persisted for 2 weeks before detection. Standard monitoring showed zero anomalies throughout.</div>
-        <div class="incident-tags">
-          <span class="tag">data exposure</span>
-          <span class="tag">2-week persistence</span>
-        </div>
-      </div>
-      <div class="incident-card">
-        <div class="incident-title">Smithery Path Traversal</div>
-        <div class="incident-body">Path traversal vulnerability affecting 3,243 MCP servers simultaneously. Discoverable via protocol-layer probing — completely invisible to standard HTTP monitoring.</div>
-        <div class="incident-tags">
-          <span class="tag">path traversal</span>
-          <span class="tag">3,243 servers</span>
-        </div>
-      </div>
-      <div class="incident-card">
-        <div class="incident-title">mcp-remote CVE-2025-6514</div>
-        <div class="incident-body">Remote code execution vulnerability, CVSS score 9.6. The behavioral signature — malformed-request acceptance — is exactly what Vouqis probes for at the protocol layer.</div>
-        <div class="incident-tags">
-          <span class="tag">RCE</span>
-          <span class="tag">CVSS 9.6</span>
-        </div>
-      </div>
-    </div>
-    <p class="incident-note">Vouqis doesn't prevent these vulnerabilities. It detects the behavioral signatures that indicate a server isn't handling edge cases correctly — before you integrate it.</p>
-  </div>
-</section>
 
-<!-- SECTION 11: TRUST SCORE TIERS -->
+<!-- ADDITIONAL SECTION 11: TRUST SCORE TIERS -->
 <section id="tiers">
   <div class="container">
     <div class="section-label">Trust Tiers</div>
@@ -1090,60 +1158,6 @@
   </div>
 </section>
 
-<!-- SECTION 12: PRICING -->
-<section id="pricing" style="background:var(--bg-dark);">
-  <div class="container">
-    <div class="section-label">Pricing</div>
-    <h2>Free to audit. $9/mo to gate.</h2>
-    <p class="section-sub">Start free with no account. Upgrade when you need CI/CD integration and history.</p>
-    <div class="pricing-grid">
-
-      <div class="plan-card">
-        <div class="plan-label">Free</div>
-        <div class="plan-price">
-          <span class="plan-free">$0</span>
-        </div>
-        <div class="plan-sub">Forever free · No account needed</div>
-        <ul class="plan-features">
-          <li><span class="fi fi-y">✓</span> Single audit runs</li>
-          <li><span class="fi fi-y">✓</span> 30-day report history</li>
-          <li><span class="fi fi-y">✓</span> Public shareable reports</li>
-          <li><span class="fi fi-y">✓</span> All 10 probes</li>
-          <li><span class="fi fi-y">✓</span> Trust score + tier</li>
-          <li><span class="fi fi-n">—</span> API key for CI/CD</li>
-          <li><span class="fi fi-n">—</span> 90-day history</li>
-          <li><span class="fi fi-n">—</span> --fail-below flag</li>
-        </ul>
-        <div class="plan-btn secondary" onclick="copyInstall()" style="display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;">
-          <code style="font-family:var(--mono);font-size:12px;color:var(--blue-bright);">npm install -g @vouqis/cli</code>
-        </div>
-      </div>
-
-      <div class="plan-card featured">
-        <div class="plan-label">Pro</div>
-        <div class="plan-launch-badge">Launch pricing — first 50 only</div>
-        <div class="plan-price">
-          <span class="plan-amount">$9</span>
-          <span class="plan-period">/mo · launch</span>
-          <span class="plan-strike">$49</span>
-        </div>
-        <div class="plan-sub">Lock in forever · Cancel anytime</div>
-        <ul class="plan-features">
-          <li><span class="fi fi-y">✓</span> Everything in Free</li>
-          <li><span class="fi fi-y">✓</span> 90-day report history</li>
-          <li><span class="fi fi-y">✓</span> Unlimited audit runs</li>
-          <li><span class="fi fi-y">✓</span> API key for CI/CD pipelines</li>
-          <li><span class="fi fi-y">✓</span> --fail-below flag (CI/CD gate)</li>
-          <li><span class="fi fi-y">✓</span> Private reports <span class="coming">coming soon</span></li>
-          <li><span class="fi fi-y">✓</span> Slack alerts on regression <span class="coming">coming soon</span></li>
-          <li><span class="fi fi-y">✓</span> Priority support</li>
-        </ul>
-        <a href="https://www.vouqis.tech/pro" class="plan-btn primary">Get Pro for $9/mo →</a>
-      </div>
-
-    </div>
-  </div>
-</section>
 
 <!-- SECTION 13: FAQ -->
 <section id="faq">
@@ -1181,6 +1195,7 @@
   </div>
 </section>
 
+
 <!-- SECTION 14: FINAL CTA -->
 <section id="final-cta">
   <div class="final-box">
@@ -1197,6 +1212,7 @@
     <p class="final-note">Built for production AI agents · Open source on GitHub</p>
   </div>
 </section>
+
 
 <!-- FOOTER -->
 <footer>
